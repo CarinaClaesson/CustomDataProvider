@@ -6,7 +6,7 @@ using System.Net;
 
 namespace CustomDataProvider
 {
-    public class TechportRetrieveMultiplePlugin : IPlugin
+    public class TechPortRetrieveMultiplePlugin : IPlugin
     {
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -50,17 +50,25 @@ namespace CustomDataProvider
 
                                     // Map TechPort data to entity model
                                     Entity entity = new Entity("cc_techport_project");
-                                    entity["cc_techport_projectid"] = Guid.NewGuid();
+
+                                    // TODO - Should test the GUID-INT translation separately in console app
+                                    // Translate id to Guid
+                                    var id = projDetails.id;
+                                    var uniqueIdentifier = CDPHelper.Int2Guid(id);
+
+                                    entity["cc_techport_projectid"] = uniqueIdentifier;
                                     entity["cc_name"] = projDetails.title;
                                     entity["cc_id"] = projDetails.id;
                                     ec.Entities.AddRange(entity);
 
-                                    //   Console.WriteLine(projDetails.startDate);
-                                    //   Console.WriteLine(projDetails.status);
-                                    //   Console.WriteLine(projDetails.description);
-                                    //   Console.WriteLine(projDetails.endDate);
-                                    //   Console.WriteLine(projDetails.benefits);
-                                    //   Console.WriteLine(projDetails.id);
+                                    // TODO: Add more fields to Virtual Entity (config) and here
+                                    // Description would be cool to have!
+                                    //   projDetails.startDate;
+                                    //   projDetails.status;
+                                    //   projDetails.description;
+                                    //   projDetails.endDate;
+                                    //   projDetails.benefits;
+                                    //   projDetails.id;
                                 }
                             }
                         }
@@ -74,57 +82,4 @@ namespace CustomDataProvider
         }
     }
 
-    public class TechportRetrievePlugin : IPlugin
-    {
-        public void Execute(IServiceProvider serviceProvider)
-        {
-            var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
-
-            var guid = context.PrimaryEntityId;
-
-            // Hur skall man få till sin retrieve?
-            // Hur veta vilken post som skall hämtas?
-            // I exemplet i docs har de ingen retrieve bara retrieve multiple?
-            // De har även en som returnerar en query med det är motsvarande när jag hämtar med http?
-
-
-
-
-
-            // Fetch data from another source
-            /*
-            var item = SensorMeasurementRepository.Get(context.PrimaryEntityId);
-
-            // Map 3rd party data to entity model
-            Entity entity = new Entity(context.PrimaryEntityName);
-            entity["fic_name"] = item.Name;
-            entity["fic_temp"] = item.Temperature;
-
-            // Set output parameter
-            context.OutputParameters["BusinessEntity"] = entity;
-
-    */
-
-            // Get the Techport ID so that we can fetch the fields needed
-
-
-            // Go and get the data from another source
-            // Request to get the data
-            // 
-
-            // Map Techport data to entity model
-
-            // Fetch data from another source
-            //  var item = SensorMeasurementRepository.Get(context.PrimaryEntityId);
-
-            // Map 3rd party data to entity model
-            Entity entity = new Entity(context.PrimaryEntityName);
-            // entity["fic_name"] = item.Name;
-            //  entity["fic_temp"] = item.Temperature;
-
-            // Set output parameter
-            context.OutputParameters["BusinessEntity"] = entity;
-        }
-
-    }
 }

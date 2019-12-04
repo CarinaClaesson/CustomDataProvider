@@ -61,9 +61,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomDataProvider.cs" />
+    <Compile Include="CDPHelper.cs" />
+    <Compile Include="TechPortRetrieveMultiplePlugin.cs" />
     <Compile Include="TechPortHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TechPortRetrievePlugin.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
