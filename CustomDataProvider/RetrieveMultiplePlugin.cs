@@ -1,0 +1,88 @@
+﻿using Microsoft.Xrm.Sdk;
+using Newtonsoft.Json;
+using System;
+using System.IO;
+using System.Net;
+
+namespace CustomDataProvider
+{
+    /// <summary>
+    /// Retrieves some chosen data for all Launches from the SpaceX API
+    /// </summary>
+    public class RetrieveMultiplePlugin : IPlugin
+    {
+        public void Execute(IServiceProvider serviceProvider)
+        {
+            var context = (IPluginExecutionContext)serviceProvider.GetService(typeof(IPluginExecutionContext));
+            var service = ((IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory))).CreateOrganizationService(new Guid?(context.UserId));
+            var tracingService = (ITracingService)serviceProvider.GetService(typeof(ITracingService));
+
+            EntityCollection ec = new EntityCollection();
+
+            tracingService.Trace("Starting to retrieve SpaceX Launch data");
+
+            try
+            {
+                // Get data about SpaceX Launches
+                var webRequest = WebRequest.Create("https://api.spacexdata.com/v3/launches?filter=rocket/rocket_name,flight_number,mission_name,launch_year,launch_date_utc,links") as HttpWebRequest;
+
+                if (webRequest == null)
+                {
+                    return;
+                }
+
+                webRequest.ContentType = "application/json";
+
+                using (var s = webRequest.GetResponse().GetResponseStream())
+                {
+                    using (var sr = new StreamReader(s))
+                    {
+                        var launchesAsJson = sr.ReadToEnd();
+                        launchesAsJson = "{\"Launches\": " + launchesAsJson + "}";
+                        tracingService.Trace("Data: {0}", launchesAsJson);
+                        var obj = JsonConvert.DeserializeObject<RootObject>(launchesAsJson);
+
+                        var launches = obj.Launches;
+                        tracingService.Trace("Total number of Launches: {0}", launches.Count);
+
+                        foreach (var launch in launches)
+                        {
+                            tracingService.Trace("Going through data for launch: {0}", launch.flight_number);
+             
+                            tracingService.Trace(launch.launch_date_utc.ToString());
+                            tracingService.Trace(launch.launch_year);
+                            tracingService.Trace(launch.links.article_link);
+                            tracingService.Trace(launch.links.mission_patch);
+                            tracingService.Trace(launch.links.video_link);
+                            tracingService.Trace(launch.rocket.rocket_name);
+                            tracingService.Trace(launch.mission_name);
+
+                            Entity entity = new Entity("cr8d8_launch");
+                            var id = launch.flight_number;
+                            var uniqueIdentifier = CDPHelper.IntToGuid(id);
+
+                            entity["cr8d8_launchid"] = uniqueIdentifier;
+                            entity["cr8d8_name"] = launch.mission_name;
+                            entity["cr8d8_id"] = launch.flight_number;
+                            entity["cr8d8_rocket"] = launch.rocket.rocket_name;
+                            entity["cr8d8_launchyear"] = launch.launch_year;
+                            entity["cr8d8_launchdate"] = launch.launch_date_utc;
+                            entity["cr8d8_missionpatch"] = launch.links.mission_patch;
+                            entity["cr8d8_presskit"] = launch.links.presskit;
+                            entity["cr8d8_videolink"] = launch.links.video_link;
+                            entity["cr8d8_wikipedia"] = launch.links.wikipedia;
+                            ec.Entities.AddRange(entity);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                tracingService.Trace("Exception with message: {0}", e.Message);
+            }
+
+            // Set output parameter
+            context.OutputParameters["BusinessEntityCollection"] = ec;
+        }
+    }
+}
