@@ -3,9 +3,72 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GetTechportData
 {
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            MD5 md5 = new MD5CryptoServiceProvider();
+            TripleDES des = new TripleDESCryptoServiceProvider();
+            var desKey = md5.ComputeHash(Encoding.UTF8.GetBytes("fjdoe85d"));
+            des.Key = desKey;
+            des.IV = new byte[des.BlockSize / 8];
+            des.Padding = PaddingMode.PKCS7;
+            des.Mode = CipherMode.ECB;
+
+
+            //E
+
+            var ct = des.CreateEncryptor();
+            var input = Encoding.UTF8.GetBytes("HIP 107310 A");
+            var output = ct.TransformFinalBlock(input, 0, input.Length);
+
+
+
+            var guidvalue = new Guid(output);
+
+            Console.WriteLine("output" + output);
+            Console.WriteLine("guid:" + guidvalue.ToString());
+
+            // bACK TO STRING
+           var testing = guidvalue.ToByteArray();
+            var result1 = Convert.ToBase64String(testing);
+            //  var result1 =  Convert.ToBase64String(output);
+
+
+            //D
+
+            var ctd = des.CreateDecryptor();
+            var input2 = Convert.FromBase64String(result1);
+            var output2 = ctd.TransformFinalBlock(input2, 0, input2.Length);
+            var result2 =  Encoding.UTF8.GetString(output2);
+
+            Console.WriteLine("Decrypted:" + result2);
+
+
+            /*
+                        var guidvalue = new Guid(encryptedValue);
+
+                        Console.WriteLine("guid:" + guidvalue.ToString());
+
+                        var bytesagain = guidvalue.ToByteArray();
+
+                        var decryptedValue = Crypto.Decrypt(bytesagain, "dosj56sj");
+
+                        Console.WriteLine("Decrypted:" + decryptedValue);
+                        */
+            Console.ReadLine();
+        }
+    }
+
+    /*
+
     // Classes generated for when quering a certain project
     public class LeadOrganization
     {
@@ -165,4 +228,5 @@ namespace GetTechportData
             Console.ReadLine();
         }
     }
+    */
 }
