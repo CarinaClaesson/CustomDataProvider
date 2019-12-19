@@ -1,7 +1,9 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 
 namespace CustomDataProvider
@@ -38,41 +40,9 @@ namespace CustomDataProvider
                     using (var sr = new StreamReader(s))
                     {
                         var launchesAsJson = sr.ReadToEnd();
-                        launchesAsJson = "{\"Launches\": " + launchesAsJson + "}";
-                        tracingService.Trace("Data: {0}", launchesAsJson);
-                        var obj = JsonConvert.DeserializeObject<RootObject>(launchesAsJson);
-
-                        var launches = obj.Launches;
+                        var launches = JsonConvert.DeserializeObject<List<Launch>>(launchesAsJson);
                         tracingService.Trace("Total number of Launches: {0}", launches.Count);
-
-                        foreach (var launch in launches)
-                        {
-                            tracingService.Trace("Going through data for launch: {0}", launch.flight_number);
-             
-                            tracingService.Trace(launch.launch_date_utc.ToString());
-                            tracingService.Trace(launch.launch_year);
-                            tracingService.Trace(launch.links.article_link);
-                            tracingService.Trace(launch.links.mission_patch);
-                            tracingService.Trace(launch.links.video_link);
-                            tracingService.Trace(launch.rocket.rocket_name);
-                            tracingService.Trace(launch.mission_name);
-
-                            Entity entity = new Entity("cr8d8_launch");
-                            var id = launch.flight_number;
-                            var uniqueIdentifier = CDPHelper.IntToGuid(id);
-
-                            entity["cr8d8_launchid"] = uniqueIdentifier;
-                            entity["cr8d8_name"] = launch.mission_name;
-                            entity["cr8d8_id"] = launch.flight_number;
-                            entity["cr8d8_rocket"] = launch.rocket.rocket_name;
-                            entity["cr8d8_launchyear"] = launch.launch_year;
-                            entity["cr8d8_launchdate"] = launch.launch_date_utc;
-                            entity["cr8d8_missionpatch"] = launch.links.mission_patch;
-                            entity["cr8d8_presskit"] = launch.links.presskit;
-                            entity["cr8d8_videolink"] = launch.links.video_link;
-                            entity["cr8d8_wikipedia"] = launch.links.wikipedia;
-                            ec.Entities.AddRange(entity);
-                        }
+                        ec.Entities.AddRange(launches.Select(l => l.getLaunchAsEntity(tracingService)));
                     }
                 }
             }

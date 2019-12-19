@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.Xrm.Sdk;
 using System;
 using System.Collections.Generic;
 
@@ -13,7 +14,7 @@ namespace CustomDataProvider
     }
 
     /// <summary>
-    /// Represents Links retrieved from the SpaceX API
+    /// Represents Links from the SpaceX API
     /// </summary>
     public class Links
     {
@@ -32,7 +33,7 @@ namespace CustomDataProvider
     }
 
     /// <summary>
-    /// Represents Launches retrieved from the SpaceX API
+    /// Represents Launches from the SpaceX API
     /// </summary>
     public class Launch
     {
@@ -42,13 +43,29 @@ namespace CustomDataProvider
         public string launch_year { get; set; }
         public DateTime launch_date_utc { get; set; }
         public Links links { get; set; }
-    }
 
-    /// <summary>
-    /// Represents the Root Object of the JSON retrieved from the SpaceX API
-    /// </summary>
-    public class RootObject
-    {
-        public List<Launch> Launches { get; set; }
+        public Entity getLaunchAsEntity(ITracingService tracingService)
+        {
+            Entity entity = new Entity("cr8d8_launch");
+
+            // Transform int unique value to Guid
+            var id = flight_number;
+            var uniqueIdentifier = CDPHelper.IntToGuid(id);
+            tracingService.Trace("Flight Number: {0} transformed into Guid: {1}", flight_number, uniqueIdentifier);
+
+            // Map data to entity
+            entity["cr8d8_launchid"] = uniqueIdentifier;
+            entity["cr8d8_name"] = mission_name;
+            entity["cr8d8_id"] = flight_number;
+            entity["cr8d8_rocket"] = rocket.rocket_name;
+            entity["cr8d8_launchyear"] = launch_year;
+            entity["cr8d8_launchdate"] = launch_date_utc;
+            entity["cr8d8_missionpatch"] = links.mission_patch;
+            entity["cr8d8_presskit"] = links.presskit;
+            entity["cr8d8_videolink"] = links.video_link;
+            entity["cr8d8_wikipedia"] = links.wikipedia;
+
+            return entity;
+        }
     }
 }
