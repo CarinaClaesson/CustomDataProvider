@@ -59,7 +59,6 @@ namespace CustomDataProvider
 
             // Set output parameter
             context.OutputParameters["BusinessEntity"] = entity;
-
         }
     }
 }

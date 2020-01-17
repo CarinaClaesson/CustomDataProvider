@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Xrm.Sdk;
+﻿using Microsoft.Xrm.Sdk;
 using System;
 using System.Collections.Generic;
 
@@ -46,7 +45,7 @@ namespace CustomDataProvider
 
         public Entity getLaunchAsEntity(ITracingService tracingService)
         {
-            Entity entity = new Entity("cr8d8_launch");
+            Entity entity = new Entity("cc_spacex_rocket_launch");
 
             // Transform int unique value to Guid
             var id = flight_number;
@@ -54,16 +53,16 @@ namespace CustomDataProvider
             tracingService.Trace("Flight Number: {0} transformed into Guid: {1}", flight_number, uniqueIdentifier);
 
             // Map data to entity
-            entity["cr8d8_launchid"] = uniqueIdentifier;
-            entity["cr8d8_name"] = mission_name;
-            entity["cr8d8_id"] = flight_number;
-            entity["cr8d8_rocket"] = rocket.rocket_name;
-            entity["cr8d8_launchyear"] = launch_year;
-            entity["cr8d8_launchdate"] = launch_date_utc;
-            entity["cr8d8_missionpatch"] = links.mission_patch;
-            entity["cr8d8_presskit"] = links.presskit;
-            entity["cr8d8_videolink"] = links.video_link;
-            entity["cr8d8_wikipedia"] = links.wikipedia;
+            entity["cc_spacex_rocket_launchid"] = uniqueIdentifier;
+            entity["cc_name"] = mission_name;
+            entity["cc_flight_number"] = flight_number;
+            entity["cc_rocket"] = rocket.rocket_name;
+            entity["cc_launch_year"] = launch_year;
+            entity["cc_launch_date"] = launch_date_utc;
+            entity["cc_mission_patch"] = links.mission_patch;
+            entity["cc_presskit"] = links.presskit;
+            entity["cc_video_link"] = links.video_link;
+            entity["cc_wikipedia"] = links.wikipedia;
 
             return entity;
         }
