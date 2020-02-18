@@ -26,7 +26,7 @@ namespace CustomDataProvider
             try
             {
                 // Get data about SpaceX Launches
-                var webRequest = WebRequest.Create("https://api.spacexdata.com/v3/launches?filter=rocket/rocket_name,flight_number,mission_name,launch_year,launch_date_utc,links") as HttpWebRequest;
+                var webRequest = WebRequest.Create("https://api.spacexdata.com/v3/launches?filter=rocket/rocket_name,flight_number,mission_name,launch_year,launch_date_utc,links,details") as HttpWebRequest;
 
                 if (webRequest == null)
                 {
@@ -42,7 +42,7 @@ namespace CustomDataProvider
                         var launchesAsJson = sr.ReadToEnd();
                         var launches = JsonConvert.DeserializeObject<List<Launch>>(launchesAsJson);
                         tracingService.Trace("Total number of Launches: {0}", launches.Count);
-                        ec.Entities.AddRange(launches.Select(l => l.getLaunchAsEntity(tracingService)));
+                        ec.Entities.AddRange(launches.Select(l => l.ToEntity(tracingService)));
                     }
                 }
             }

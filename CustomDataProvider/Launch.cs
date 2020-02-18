@@ -42,8 +42,9 @@ namespace CustomDataProvider
         public string launch_year { get; set; }
         public DateTime launch_date_utc { get; set; }
         public Links links { get; set; }
+        public string details { get; set; }
 
-        public Entity getLaunchAsEntity(ITracingService tracingService)
+        public Entity ToEntity(ITracingService tracingService)
         {
             Entity entity = new Entity("cc_spacex_rocket_launch");
 
@@ -63,6 +64,7 @@ namespace CustomDataProvider
             entity["cc_presskit"] = links.presskit;
             entity["cc_video_link"] = links.video_link;
             entity["cc_wikipedia"] = links.wikipedia;
+            entity["cc_details"] = details;
 
             return entity;
         }
